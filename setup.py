@@ -6,7 +6,7 @@ setup(
     packages=find_packages(),  # auto find all packages
     install_requires=[  # package dependencies
         'requests>=2.31.0',  # for example
-        'cryptography==41.0.3'
+        'cryptography==41.0.3',
         'keyring==24.2.0'
     ],
     author='anfedoro',  # author name or organization
