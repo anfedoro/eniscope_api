@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='eniscopeapi',  # package name
-    version='0.3',  # package version
+    version='0.4',  # package version
     packages=find_packages(),  # auto find all packages
     install_requires=[  # package dependencies
         'requests>=2.31.0',  # for example
@@ -16,7 +16,7 @@ setup(
     long_description_content_type='text/markdown',  # Type of the long description
     url='https://github.com/anfedoro/eniscope',  # Url to the github repo
     classifiers=[
-        'Development Status :: 3 - Alpha',  # Development status
+        'Development Status :: 4 - Alpha',  # Development status
         'Intended Audience :: Developers',  # Audience
         'Programming Language :: Python :: 3.11',
         
