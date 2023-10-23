@@ -2,6 +2,7 @@ import base64
 import hashlib
 import keyring
 from cryptography.fernet import Fernet
+import getpass, sys, os
 
 SERVICE_NAME = "eniscope"
 
@@ -116,8 +117,14 @@ def retrieve_user_credentials(service_name):
 def main():
     is_stored = False
 
+    if sys.platform == "linux":
+        from keyrings.cryptfile.cryptfile import CryptFileKeyring
+        kr = CryptFileKeyring()
+        kr.keyring_key = os.environ.get('KEYRING_CRYPTFILE_PASSWORD') or getpass.getpass("Enter keyring password: ")
+        keyring.set_keyring(kr)
+
     user_email = input("Enter user email: ")
-    user_password = input("Enter user password: ")
+    user_password = getpass.getpass("Enter user password: ")
     if user_password == "" and user_email != "":
         print("No user password entered, please ensure you don't use empty password")
 
