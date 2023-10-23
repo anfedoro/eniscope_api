@@ -1,14 +1,20 @@
 import requests
 import json
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from  eniscope.eniscope_creds import get_key, retrieve_api_key, retrieve_user_credentials
+from eniscope.eniscope_creds import (
+    get_key,
+    retrieve_api_key,
+    retrieve_user_credentials,
+    set_backend_password,
+)
 
 # Base Eniscope API URL
 BASE_URL = "https://core.eniscope.com/v1/"
 
+
 # main Eniscope API client class
 class EniscopeAPIClient:
-    def __init__(self, base_url= BASE_URL):
+    def __init__(self, base_url=BASE_URL):
         """
         Initialize the Eniscope API Client.
 
@@ -19,7 +25,7 @@ class EniscopeAPIClient:
         self.encryption_key = None
 
         self.base_url = base_url
-        self.auth_data  = None
+        self.auth_data = None
         self.headers = None
         self.session = requests.Session()
         self.response = None
@@ -33,16 +39,15 @@ class EniscopeAPIClient:
         - bool: True if authentication is successful, False otherwise.
         """
         # Retrieve  all authoization data from keyring
+        set_backend_password()
         self.api_key = retrieve_api_key("eniscope")
         self.encryption_key = get_key()
         self.auth_data = retrieve_user_credentials("eniscope")
 
-        
-
         self.headers = {
             "Authorization": f"Basic {self.auth_data}",
             "Accept": "text/json",  # Default response content type
-            "X-Eniscope-API": self.api_key
+            "X-Eniscope-API": self.api_key,
         }
         self.session.headers.update(self.headers)
 
@@ -58,7 +63,6 @@ class EniscopeAPIClient:
             return True
         else:
             return False
-
 
     def get_request_data(self, url):
         """

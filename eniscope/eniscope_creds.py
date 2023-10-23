@@ -7,6 +7,13 @@ import getpass, sys, os
 SERVICE_NAME = "eniscope"
 
 
+def set_backend_password():
+    if sys.platform == "linux":
+        from keyrings.cryptfile.cryptfile import CryptFileKeyring
+        kr = CryptFileKeyring()
+        kr.keyring_key = os.environ.get('KEYRING_CRYPTFILE_PASSWORD') or getpass.getpass("Enter keyring password: ")
+        keyring.set_keyring(kr)
+
 def generate_key():
     """
     Generates a key and saves it using keyring.
@@ -117,12 +124,7 @@ def retrieve_user_credentials(service_name):
 def main():
     is_stored = False
 
-    if sys.platform == "linux":
-        from keyrings.cryptfile.cryptfile import CryptFileKeyring
-        kr = CryptFileKeyring()
-        kr.keyring_key = os.environ.get('KEYRING_CRYPTFILE_PASSWORD') or getpass.getpass("Enter keyring password: ")
-        keyring.set_keyring(kr)
-
+    set_backend_password()  
     user_email = input("Enter user email: ")
     user_password = getpass.getpass("Enter user password: ")
     if user_password == "" and user_email != "":
