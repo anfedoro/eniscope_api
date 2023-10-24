@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='eniscopeapi',  # package name
-    version='0.4',  # package version
+    version='0.41',  # package version
     packages=find_packages(),  # auto find all packages
     install_requires=[  # package dependencies
         'requests>=2.31.0',  # for example
