@@ -15,3 +15,4 @@ def test_user_auth():
     assert authenticated == True
     assert client.auth_data is not None
     assert client.headers is not None
+

@@ -93,14 +93,14 @@ class EniscopeAPIClient:
         except requests.exceptions.HTTPError as e:
             # HTTP errors processing
             error_content = e.response.reason.encode('ISO-8859-1').decode('utf-8') # this is tricky approach.. need to keep this under monitoring
-            error_content = error_content + unquote(e.response.url)
-            print(f"HTTP error: {error_content}")
-            return None
+            error_content = error_content + " " + unquote(e.response.url)
+            print(f"HTTP error {e.response.status_code}: {error_content}")
+            raise
 
         except requests.exceptions.RequestException as e:
             # Other requests errors
             print(f"Request error: {e}")
-            return None
+            raise
 
 
     def options_request(self, url):
@@ -213,10 +213,13 @@ class EniscopeAPIClient:
         if not fields:
             url = f"{self.base_url}/readings/{channel_id}/"
             response = self.options_request(url)
+            fields = response["filters"]["fields"]
+            fields.append('RH')
             self.__shape_fields__(response["filters"]["fields"])
         else:
             self.__shape_fields__(fields)
         url = f"{self.base_url}readings/{channel_id}/?action=summarise&{self.fields}daterange[]={start_date}&daterange[]={end_date}&res={resolution}"
+
 
         response = self.get_request_data(url)
         return response
