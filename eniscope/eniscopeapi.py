@@ -1,4 +1,5 @@
 import requests
+from urllib.parse import unquote
 import json
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from eniscope.eniscope_creds import (
@@ -46,7 +47,7 @@ class EniscopeAPIClient:
 
         self.headers = {
             "Authorization": f"Basic {self.auth_data}",
-            "Accept": "text/json",  # Default response content type
+            "Accept": "*/*",  # Default response content type
             "X-Eniscope-API": self.api_key,
         }
         self.session.headers.update(self.headers)
@@ -58,6 +59,7 @@ class EniscopeAPIClient:
                 "X-Eniscope-API": self.api_key,
                 "X-Eniscope-Token": response.headers["X-Eniscope-Token"],
                 "Accept": "text/json",  # Default response content type
+                "Accept-Encoding": "gzip, deflate, br"
             }
             self.session.headers.update(self.headers)
             return True
@@ -72,15 +74,34 @@ class EniscopeAPIClient:
         - url (str): The URL to send the GET request to.
 
         Returns:
-        - dict: The JSON response data.
+        - dict: The JSON response data if successful, None otherwise.
         """
         try:
             response = self.session.get(url)
-            response.raise_for_status()
-            return json.loads(response.text)
+            response.encoding = response.apparent_encoding
+            response.raise_for_status()  # This will raise a requests.exceptions.HTTPError for certain status codes
+
+            # Check if the response is JSON or not
+            if 'json' in response.headers.get('Content-Type', '').lower():
+                return response.json()  # parse JSON response
+            else:
+                # If response if not JSON, then process as text
+                content = response.content.decode('utf-8', errors='replace')
+                print(f"Unexpected response: {content}")
+                return None
+
+        except requests.exceptions.HTTPError as e:
+            # HTTP errors processing
+            error_content = e.response.reason.encode('ISO-8859-1').decode('utf-8') # this is tricky approach.. need to keep this under monitoring
+            error_content = error_content + unquote(e.response.url)
+            print(f"HTTP error: {error_content}")
+            return None
+
         except requests.exceptions.RequestException as e:
+            # Other requests errors
             print(f"Request error: {e}")
             return None
+
 
     def options_request(self, url):
         """

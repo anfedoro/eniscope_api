@@ -1,5 +1,5 @@
 from unittest.mock import patch
-import pytest
+import pytest,requests
 import eniscope.eniscopeapi as es
 
 # empty test function
