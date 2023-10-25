@@ -221,7 +221,11 @@ class EniscopeAPIClient:
         url = f"{self.base_url}readings/{channel_id}/?action=summarise&{self.fields}daterange[]={start_date}&daterange[]={end_date}&res={resolution}"
 
 
-        response = self.get_request_data(url)
+        try:
+            response = self.get_request_data(url)
+        except Exception as e:
+            print(f"\nError for {channel_id} {start_date} {end_date}: {str(e)}")
+            raise
         return response
 
     def __shape_fields__(self, fields: list):
@@ -268,7 +272,8 @@ class EniscopeAPIClient:
                 )
                 return channel_id, start_date, end_date, result
             except Exception as e:
-                print(f"\nError for {channel_id} {start_date} {end_date}: {str(e)}")
+               
+                raise
 
         # Determine the maximum number of workers based on the input lists
         max_workers = min(THREAD_LIMIT, len(channel_ids) * len(date_ranges))
