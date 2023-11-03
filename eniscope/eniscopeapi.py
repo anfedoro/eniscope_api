@@ -59,7 +59,7 @@ class EniscopeAPIClient:
                 "X-Eniscope-API": self.api_key,
                 "X-Eniscope-Token": response.headers["X-Eniscope-Token"],
                 "Accept": "text/json",  # Default response content type
-                "Accept-Encoding": "gzip, deflate, br"
+                "Accept-Encoding": "gzip, deflate, br",
             }
             self.session.headers.update(self.headers)
             return True
@@ -82,17 +82,19 @@ class EniscopeAPIClient:
             response.raise_for_status()  # This will raise a requests.exceptions.HTTPError for certain status codes
 
             # Check if the response is JSON or not
-            if 'json' in response.headers.get('Content-Type', '').lower():
+            if "json" in response.headers.get("Content-Type", "").lower():
                 return response.json()  # parse JSON response
             else:
                 # If response if not JSON, then process as text
-                content = response.content.decode('utf-8', errors='replace')
+                content = response.content.decode("utf-8", errors="replace")
                 print(f"Unexpected response: {content}")
                 return None
 
         except requests.exceptions.HTTPError as e:
             # HTTP errors processing
-            error_content = e.response.reason.encode('ISO-8859-1').decode('utf-8') # this is tricky approach.. need to keep this under monitoring
+            error_content = e.response.reason.encode("ISO-8859-1").decode(
+                "utf-8"
+            )  # this is tricky approach.. need to keep this under monitoring
             error_content = error_content + " " + unquote(e.response.url)
             print(f"HTTP error {e.response.status_code}: {error_content}")
             raise
@@ -101,7 +103,6 @@ class EniscopeAPIClient:
             # Other requests errors
             print(f"Request error: {e}")
             raise
-
 
     def options_request(self, url):
         """
@@ -214,12 +215,11 @@ class EniscopeAPIClient:
             url = f"{self.base_url}/readings/{channel_id}/"
             response = self.options_request(url)
             fields = response["filters"]["fields"]
-            fields.append('RH')
+            fields.append("RH")
             self.__shape_fields__(response["filters"]["fields"])
         else:
             self.__shape_fields__(fields)
         url = f"{self.base_url}readings/{channel_id}/?action=summarise&{self.fields}daterange[]={start_date}&daterange[]={end_date}&res={resolution}"
-
 
         try:
             response = self.get_request_data(url)
@@ -272,7 +272,6 @@ class EniscopeAPIClient:
                 )
                 return channel_id, start_date, end_date, result
             except Exception as e:
-               
                 raise
 
         # Determine the maximum number of workers based on the input lists
@@ -447,7 +446,7 @@ class EniscopeAPIClient:
         """
         if not date_range or isinstance(date_range, int):
             url = f"{self.base_url}events/?organization={organization_id}&daterange[]=today&limit=0"
-        elif isinstance(date_range, (list, tuple)):
+        elif isinstance(date_range, list):
             url = f"{self.base_url}events/?organization={organization_id}&daterange[]={date_range[0]}&daterange[]={date_range[1]}&limit=100"
         elif isinstance(date_range, str):
             url = f"{self.base_url}events/?organization={organization_id}&daterange[]={date_range}&limit=100"
@@ -477,4 +476,4 @@ class EniscopeAPIClient:
 
             return event_pages
         else:
-            return response
+            return response["events"]
